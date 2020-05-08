@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "154737890524",
+    "firebase_url": "https://zianbammusic-50606.firebaseio.com",
+    "project_id": "zianbammusic-50606",
+    "storage_bucket": "zianbammusic-50606.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:154737890524:android:f7e6b1ae1bc6dcc12d5019",
+        "android_client_info": {
+          "package_name": "com.petergangmei.rongmeimusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "154737890524-7je6g6ishdr8q9l86faobg05372rg4ep.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWYECsKTl-YWXP3W6rLfzp8krrwtO0xGY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "154737890524-7je6g6ishdr8q9l86faobg05372rg4ep.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
