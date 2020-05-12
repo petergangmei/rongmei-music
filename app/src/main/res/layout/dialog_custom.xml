@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:id="@+id/tool">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_back_white"
+                android:id="@+id/btnBack"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textStyle="bold"
+                android:textColor="@color/colorWhite"
+                android:textSize="18sp"
+                android:layout_centerHorizontal="true"
+                android:text="Account"/>
+
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+    <!-- profile-->
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_below="@id/tool"
+        android:background="@drawable/gradiant_priame"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/boy"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:layout_marginStart="5dp"
+                    android:textSize="16sp"
+                    android:id="@+id/userName"
+                    android:textColor="@color/colorWhite"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:id="@+id/musiclistenCount"
+                    android:layout_marginStart="5dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/colorWhite"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:id="@+id/userEmail"
+                    android:layout_marginStart="5dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/colorWhite"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+    <!--        developer credit section-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="50dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_marginBottom="40dp"
+            android:text="Contact us: \n contact.rongmeimusic@gmail.com"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="verson"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/appVerson"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17sp"
+            android:text="Developed by Peter Gangmei"/>
+
+    </LinearLayout>
+</RelativeLayout>

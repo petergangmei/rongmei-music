@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context=".LoginActivity">
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:visibility="gone"
+        android:id="@+id/tool">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Account setup"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"
+                android:layout_marginBottom="5dp"
+                android:textStyle="bold"/>
+        </RelativeLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@id/tool"
+        android:id="@+id/introVideoLay"
+        android:orientation="vertical">
+        <VideoView
+            android:id="@+id/VideoView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:saveEnabled="false"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="80dp"
+            android:visibility="gone"
+            android:id="@+id/musicNote"
+            android:src="@drawable/ic_music_note"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="150dp"
+            android:id="@+id/continueApp"
+            android:visibility="gone"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/gradiant_btn_one"
+            android:text="Continue"/>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="15dp"
+        android:visibility="gone"
+        android:id="@+id/loginLay"
+        android:layout_centerInParent="true">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/ic_account_interface"/>
+        <EditText
+            android:id="@+id/emailField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="25"
+            android:padding="12dp"
+            android:background="@drawable/gradiant_text_field"
+            android:hint="Email" />
+
+        <EditText
+            android:id="@+id/passwordField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:maxLength="6"
+            android:visibility="gone"
+            android:padding="12dp"
+            android:background="@drawable/gradiant_text_field"
+            android:hint="6 digit pin" />
+
+        <EditText
+            android:id="@+id/nameField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="15"
+            android:visibility="gone"
+            android:padding="12dp"
+            android:background="@drawable/gradiant_text_field"
+            android:hint="Your name" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnContinue"
+            android:tag="login"
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/gradiant_btn_one"
+            android:layout_marginTop="8dp"
+            android:text="Continue"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Error Message"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/colorRed"
+            android:id="@+id/errorMsg"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+
+</RelativeLayout>

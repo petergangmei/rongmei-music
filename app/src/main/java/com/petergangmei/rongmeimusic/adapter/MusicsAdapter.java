@@ -50,23 +50,26 @@ public class MusicsAdapter extends RecyclerView.Adapter<MusicsAdapter.ViewHolder
         final Music music =  musicList.get(position);
         holder.songtitle.setText(music.getTitle());
         holder.singer.setText(music.getArtist());
-        Glide.with(context).load(music.getCoverUrl()).into(holder.imageView);
-
-
-
-        final MediaPlayer audioPlayer = new MediaPlayer();
-        audioPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            audioPlayer.setDataSource(music.getSongUrl());
-            audioPlayer.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
+        holder.count.setText(""+music.getId());
+        if (music.getCoverUrl().equals("null")){
+            Glide.with(context).load(R.drawable.rongmei_music_logo1000).into(holder.imageView);
+        }else {
+            Glide.with(context).load(music.getCoverUrl()).into(holder.imageView);
         }
+
+
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                itemClickInterface.onItemClick(music.getId(), music.getSongUrl(), music.getTitle(), music.getArtist());
-
+                String ppl = music.getGenre();
+                String currentPlayList;
+                if (ppl.equals("Gospel")){
+                    currentPlayList = "GosplayPlayLIST";
+                }else {
+                    currentPlayList = "TopSongsPlayLIST";
+                }
+                itemClickInterface.onItemClick(position,currentPlayList,music.getId(), music.getSongUrl(), music.getTitle(), music.getArtist());
             }
         });
     }
@@ -78,12 +81,13 @@ public class MusicsAdapter extends RecyclerView.Adapter<MusicsAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         ImageView imageView;
-        TextView singer, songtitle;
+        TextView singer, songtitle,count;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
             singer = itemView.findViewById(R.id.singer);
             songtitle = itemView.findViewById(R.id.title);
+            count = itemView.findViewById(R.id.count);
         }
     }
 }

@@ -9,7 +9,7 @@
     <androidx.appcompat.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryDark"
+        android:background="@drawable/gradiant_priame"
         android:id="@+id/tool">
        <RelativeLayout
            android:layout_width="match_parent"
@@ -30,13 +30,25 @@
                android:textColor="@color/colorWhite"
                android:textSize="14sp"
                android:text="Rongmei \n Music"/>
+
+           <ImageView
+               android:layout_width="25dp"
+               android:layout_height="25dp"
+               android:src="@drawable/ic_users"
+               android:layout_marginEnd="10dp"
+               android:id="@+id/userDialog"
+               android:layout_centerVertical="true"
+               android:layout_alignParentEnd="true"/>
        </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
+
+<!--    topsong lay start-->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/tool"
-        android:id="@+id/body"
+        android:id="@+id/topSongsLay"
+        android:visibility="gone"
         android:padding="10dp"
         android:orientation="vertical">
         <TextView
@@ -51,112 +63,347 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <ImageView
-            android:layout_width="wrap_content"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_play"
-            android:layout_gravity="center"
+            android:text="Gospel"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/colorBlack"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewGospel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <!-- profile-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:padding="10dp"
             android:visibility="gone"
-            android:id="@+id/play"/>
+            android:background="@drawable/gradiant_priame"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your profile"
+                android:visibility="gone"
+                android:textColor="@color/colorWhite"
+                android:textStyle="bold"/>
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/boy"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:layout_marginStart="5dp"
+                    android:textSize="16sp"
+                    android:id="@+id/userName"
+                    android:textColor="@color/colorWhite"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:id="@+id/musiclistenCount"
+                    android:layout_marginStart="5dp"
+                    android:textSize="13sp"
+                    android:textColor="@color/colorWhite"
+                    />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
+<!--    topsong lay end-->
+<!--    miniplayer lay start-->
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="-10dp"
+        android:visibility="gone"
+        android:layout_above="@id/playerLayMini"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111">
+    </com.google.android.gms.ads.AdView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/playerLayMini"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:paddingBottom="15dp"
+            app:cardElevation="5dp"
+            app:cardCornerRadius="5dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="10dp"
+                android:paddingBottom="15dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:id="@+id/coverImageMini"
+                    android:src="@drawable/picture"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="9"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Title"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="15sp"
+                        android:id="@+id/songTitleMini"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Artist"
+                        android:textSize="12sp"
+                        android:id="@+id/songArtistMini"/>
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:id="@+id/btnPlayPauseMini"
+                    android:src="@drawable/ic_play"/>
+                <ProgressBar
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    android:id="@+id/playProgressingMini"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+<!--    miniplayer lay end-->
+<!--    playerLayList start-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/playerLay"
+        android:background="@color/colorBG"
+        android:id="@+id/playerLayPlayList"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardElevation="5dp"
+            android:id="@+id/playlistToolBar"
+            app:cardCornerRadius="5dp"
+            android:layout_marginBottom="10dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:id="@+id/customTool"
+                android:orientation="horizontal">
+               <LinearLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:orientation="horizontal">
+                   <ImageView
+                       android:layout_width="50dp"
+                       android:layout_height="50dp"
+                       android:src="@drawable/picture"
+                       android:id="@+id/coverImageExtended"/>
+                   <LinearLayout
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_marginStart="8dp"
+                       android:orientation="vertical">
+                       <TextView
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:textColor="@color/colorBlack"
+                           android:textSize="16sp"
+                           android:text="title"
+                           android:id="@+id/songTitle"/>
+
+                       <TextView
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:textSize="14sp"
+                           android:text="artist"
+                           android:id="@+id/songArtist"/>
+
+
+                   </LinearLayout>
+               </LinearLayout>
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="15dp"
+                    android:tag="show"
+                    android:id="@+id/showPlayListBtn"
+                    android:src="@drawable/ic_queue_music"/>
+                </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageCloud"
+            android:src="@drawable/rongmei_music_logo1000"
+            android:scaleType="centerCrop"
+            android:layout_centerInParent="true"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"
+            android:layout_below="@+id/playlistToolBar"
+            android:id="@+id/recyclerViewPlayList"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:layout_centerInParent="true"
+            android:layout_below="@+id/playlistToolBar"
+            android:id="@+id/recyclerViewGospelPlayList"/>
+
+    </RelativeLayout>
+<!--    playerlaylist end-->
+<!--playerlay start-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/playerLay"
         android:visibility="gone"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
         android:orientation="vertical">
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
+            app:elevation="8dp"
+            app:cardCornerRadius="5dp">
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textColor="@color/colorBlack"
-                android:visibility="gone"
-                android:textSize="16sp"
-                android:text="title"
-                android:id="@+id/songTitle"/>
+                android:layout_marginBottom="30dp"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textColor="@color/colorBlack"
+                        android:id="@+id/songduration"
+                        android:text="0:00"/>
+                    <SeekBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="6"
+                        android:id="@+id/playerSeekBar"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:textSize="14sp"
-                android:visibility="gone"
-                android:text="artist"
-                android:id="@+id/songArtist"/>
-        </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:layout_weight="1"
+                        android:textColor="@color/colorBlack"
+                        android:id="@+id/totalsongduration"
+                        android:text="0:00"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:layout_weight="2"
+                        android:src="@drawable/ic_skip_previous"
+                        android:layout_gravity="center"
+                        android:id="@+id/btnSkipPrevious"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textColor="@color/colorBlack"
-                android:id="@+id/songduration"
-                android:text="0:00"/>
-            <SeekBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="6"
-                android:id="@+id/playerSeekBar"/>
+                    <ImageView
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_play"
+                        android:layout_gravity="center"
+                        android:id="@+id/btnPlayPause"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:textColor="@color/colorBlack"
-                android:id="@+id/totalsongduration"
-                android:text="0:00"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                    <ProgressBar
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_weight="1"
+                        android:visibility="gone"
+                        android:id="@+id/playProgressing"/>
 
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_weight="1"
-                android:src="@drawable/ic_skip_previous"
-                android:layout_gravity="center"
-                android:id="@+id/btnSkipPrevious"/>
-            <ProgressBar
-                android:id="@+id/loadingProgress"
-                style="@style/SpinKitView.ThreeBounce"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:visibility="gone"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                 />
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_weight="1"
-                android:src="@drawable/ic_play"
-                android:layout_gravity="center"
-                android:id="@+id/btnPlayPause"/>
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_weight="1"
-                android:src="@drawable/ic_skip_next"
-                android:layout_gravity="center"
-                android:id="@+id/btnSkipNext"/>
-        </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:layout_weight="2"
+                        android:src="@drawable/ic_skip_next"
+                        android:layout_gravity="center"
+                        android:id="@+id/btnSkipNext"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </LinearLayout>
-
-
+<!--    playerlay end-->
+<!--    loading-->
+    <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:id="@+id/loadingLay"
+    android:layout_centerInParent="true">
+    <ProgressBar
+        android:id="@+id/loadingProgress"
+        style="@style/SpinKitView.Large.FadingCircle"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_centerInParent="true"
+        android:indeterminateTint="@color/colorPrimaryDark"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading.."
+        android:textSize="14sp"
+        android:id="@+id/loadingText"/>
+</LinearLayout>
 
 </RelativeLayout>
