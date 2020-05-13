@@ -29,9 +29,13 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.StaticLayout;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -102,16 +106,26 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
     private boolean FreshStart =true;
 
      int totalSongsV;
+     int totalSongsVG;
+    int totalSearchResultV;
+
     Bitmap bitmap;
     int callsplash = 0;
      Dialog dialongshare;
     private static String URL = "http://rongmeimusic.pythonanywhere.com/api/";
     RecyclerView recyclerView,recyclerViewGospel,recyclerViewPlayList,recyclerViewGospelPlayList;
-    List<Music> musicList, gospelplayList;
+    List<Music> musicList, gospelplayList, searchResultList;
 
     MusicsAdapter musicsAdapter;
     MusicsPlayListAdapter musicsPlayListAdapter;
 
+
+    //toolbar section
+    private ImageView musicSearch,btnBackSL;
+    private LinearLayout logoLay;
+    private RelativeLayout searchLay;
+    private EditText searchField;
+    private ProgressBar searchingPB;
 
     private Toolbar tool;
     private ImageView btnPlayPause, btnSkipPrevious, btnSkipNext, coverImageMini, btnPlayPauseMini,showPlayListBtn;
@@ -134,12 +148,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
     NotificationManager notificationManager;
 
     //Dialog
-    Dialog customUserDialog;
+    private Dialog customUserDialog;
+    private Dialog searchDialog;
 
     //Strings
     String fromIntent = "null";
 
-    private int  positionV;
+    private int  positionV, positionVG;
     BroadcastReceiver broadcastReceiver;
     NotificationActionServices notificationActionServices;
     @Override
@@ -150,10 +165,19 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         ref = FirebaseDatabase.getInstance().getReference();
 
+        //toolbar section
+        musicSearch = findViewById(R.id.musicSearch);
+        logoLay = findViewById(R.id.logoLay);
+        searchLay = findViewById(R.id.searchLay);
+        searchField= (EditText) findViewById(R.id.searhField);
+        searchingPB = findViewById(R.id.searchingPB);
+
         //playerlayPlaylist
         playerLayPlayList = findViewById(R.id.playerLayPlayList);
         customTool = findViewById(R.id.customTool);
         coverImageExtended = findViewById(R.id.coverImageExtended);
+        showPlayListBtn = findViewById(R.id.showPlayListBtn);
+        btnBackSL = findViewById(R.id.btnBackSL);
 
         tool = findViewById(R.id.tool);
         recyclerView = findViewById(R.id.recyclerView);
@@ -188,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
         imageCloud = findViewById(R.id.imageCloud);
         playProgressingMini= findViewById(R.id.playProgressingMini);
 
-        showPlayListBtn = findViewById(R.id.showPlayListBtn);
+
         mediaPlayer = new MediaPlayer();
         playerSeekBar.setMax(100);
         //layouts
@@ -201,6 +225,17 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
 
 
 
+        //broadcast receiver
+        receiveBroadCase();
+
+        //toobarsection
+        musicSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                songSearchFilterSection();
+            }
+        });
+
         //show user profile dialog
         btnUserDialog.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -208,7 +243,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
                 showuserProfileDialog();
             }
         });
-
         //one sone completed
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -264,6 +298,139 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
                 GetNextSong();
             }
         });
+    }
+
+
+    private void songSearchFilterSection() {
+
+        if (musicSearch.getTag().toString().equals("showSL")){
+            logoLay.setVisibility(View.GONE);
+            searchLay.setVisibility(View.VISIBLE);
+            musicSearch.setImageResource(R.drawable.ic_music_search_black);
+            musicSearch.setTag("search");
+            searchField.requestFocus();
+            showSoftKeyBoard(searchField);
+        }else if (musicSearch.getTag().toString().equals("search")){
+            filterSearchKey();
+        }
+        searchField.setOnKeyListener(new View.OnKeyListener() {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    // Perform action on key press
+                    filterSearchKey();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        //close search lay
+        btnBackSL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (searchField.getText().length()== 0){
+                    logoLay.setVisibility(View.VISIBLE);
+                    searchLay.setVisibility(View.GONE);
+                    musicSearch.setImageResource(R.drawable.ic_music_search);
+                    musicSearch.setTag("showSL");
+                    hideSoftKeyBoard();
+                }else {
+                    searchField.setText("");
+                }
+            }
+        });
+    }
+
+
+    private void filterSearchKey() {
+        musicSearch.setVisibility(View.GONE);
+        searchingPB.setVisibility(View.VISIBLE);
+
+        //query song
+        //topgospel songs
+        String searchURL = "http://rongmeimusic.pythonanywhere.com/api/filter/"+searchField.getText().toString();
+        RequestQueue rq = Volley.newRequestQueue(this);
+        JsonArrayRequest jArrayRequest = new JsonArrayRequest(Request.Method.GET, searchURL, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                searchResultList = new ArrayList<>();
+                searchResultList.clear();
+                totalSearchResultV = response.length();
+                for (int i=0; i <response.length(); i++){
+                    try {
+                        JSONObject musicObject = response.getJSONObject(i);
+                        Music music = new Music();
+                        music.setId(i);
+                        music.setSongId(musicObject.getString("id").toString());
+                        music.setTitle(musicObject.getString("title").toString());
+                        music.setArtist(musicObject.getString("artist"));
+                        music.setGenre(musicObject.getString("genre").toString());
+                        music.setCoverUrl(musicObject.getString("coverURL").toString());
+                        music.setSongUrl(musicObject.getString("songURL").toString());
+//                        Log.d("tag", ": for loop:"+musicObject.getString("coverURL").toString());
+                        searchResultList.add(music);
+                    }catch (Exception e){
+
+                    }
+                }
+                showSearchResult();
+
+
+            }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+
+        });
+        rq.add(jArrayRequest);
+
+
+    }
+
+    private void showSearchResult() {
+        searchingPB.setVisibility(View.GONE);
+        musicSearch.setVisibility(View.VISIBLE);
+        searchDialog = new Dialog(MainActivity.this);
+        searchDialog.setContentView(R.layout.dialog_search_contain);
+        searchDialog.show();
+        ImageView btnBack;
+        RecyclerView recyclerViewResult;
+        TextView resultCout;
+        btnBack = searchDialog.findViewById(R.id.btnBack);
+        recyclerViewResult = searchDialog.findViewById(R.id.recyclerViewSearchResult);
+        resultCout = searchDialog.findViewById(R.id.result);
+        resultCout.setText(totalSearchResultV+" Result found.");
+
+//        close search dialog
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchDialog.dismiss();
+                searchingPB.setVisibility(View.GONE);
+                musicSearch.setVisibility(View.VISIBLE);
+            }
+        });
+        //playlist
+        recyclerViewResult.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        musicsPlayListAdapter = new MusicsPlayListAdapter(searchResultList, MainActivity.this, MainActivity.this);
+        recyclerViewResult.setAdapter(musicsPlayListAdapter);
+    }
+
+    //show soft keyboard
+    private void showSoftKeyBoard(EditText searhField) {
+        searhField.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(searhField, InputMethodManager.SHOW_IMPLICIT);
+    }
+    //hide soft keyboard
+    private void hideSoftKeyBoard() {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(searchField.getWindowToken(), 0);
     }
 
     private void showuserProfileDialog() {
@@ -354,12 +521,12 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
                       recyclerViewGospelPlayList.setVisibility(View.VISIBLE);
                   }
                   showPlayListBtn.setTag("hide");
+                  imageCloud.setVisibility(View.INVISIBLE);
               }else {
                   if (playListToShow.equals("TopSongsPlayLIST")){
                       recyclerViewPlayList.setVisibility(View.GONE);
                   }else if (playListToShow.equals("GosplayPlayLIST")){
                       recyclerViewGospelPlayList.setVisibility(View.GONE);
-
                   }
                   imageCloud.setVisibility(View.VISIBLE);
                   showPlayListBtn.setTag("show");
@@ -431,6 +598,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
         }
     }
 
+    //receive broatcast
     private void receiveBroadCase() {
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -452,7 +620,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
     };
 
     private void createChannel(){
-
         startService(new Intent(getBaseContext(), OnClearFromRecentService.class));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel channel = new NotificationChannel(CreateNotification.CHANNEL_ID,
@@ -487,10 +654,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
             public void onPrepared(MediaPlayer mp) {
                 mediaPlayer.start();
                 updateseekBar();
-                updateSongsTotalViews();
                 //setfreshstart value
                 positionV = id;
+                positionVG =  id;
                 FreshStart = false;
+                updateSongsTotalViews(id);
+
+
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -520,22 +690,42 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
         });
     }
 
-    private void updateSongsTotalViews() {
-        String upsongURL = "http://rongmeimusic.pythonanywhere.com/api/"+positionV+"/update";
-        Log.d(TAG, "update URL"+upsongURL);
-        RequestQueue queue = Volley.newRequestQueue(this);
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, upsongURL, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
+    private void updateSongsTotalViews(int id) {
+        if (playListToShow.equals("TopSongsPlayLIST")){
+            String  upsongURL = "http://rongmeimusic.pythonanywhere.com/api/"+musicList.get(id).getSongId()+"/update";
 
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("tag", "onErrorResponse: "+error.getMessage());
-            }
-        });
-        queue.add(jsonArrayRequest);
+            Log.d(TAG, "update URL"+upsongURL);
+            RequestQueue queue = Volley.newRequestQueue(this);
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, upsongURL, null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d("tag", "onErrorResponse: "+error.getMessage());
+                }
+            });
+            queue.add(jsonArrayRequest);
+        }else if (playListToShow.equals("GosplayPlayLIST")){
+            String  upsongURL = "http://rongmeimusic.pythonanywhere.com/api/"+gospelplayList.get(id).getSongId()+"/update";
+            Log.d(TAG, "update URL"+upsongURL);
+            RequestQueue queue = Volley.newRequestQueue(this);
+            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, upsongURL, null, new Response.Listener<JSONArray>() {
+                @Override
+                public void onResponse(JSONArray response) {
+
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d("tag", "onErrorResponse: "+error.getMessage());
+                }
+            });
+            queue.add(jsonArrayRequest);
+        }
+
 
     }
 
@@ -560,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
                                 }
                             });
 
-                    if (currentView >4){
+                    if (currentView >50){
                         shareapptoUnlockMoresongs();
                     }
                 }
@@ -581,7 +771,20 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                CreateNotification.createNotification(MainActivity.this, musicList.get(positionV-1), R.drawable.ic_play,1,musicList.size()-1);
+                if (FreshStart){
+                    CreateNotification.createNotification(MainActivity.this, musicList.get(positionV), R.drawable.ic_play, 1,musicList.size());
+                    //setfreshstart value
+                    FreshStart = false;
+                }else {
+                    if (positionV==0){
+                        int positionVV =0;
+                        CreateNotification.createNotification(MainActivity.this, musicList.get(positionVV), R.drawable.ic_play, 1,musicList.size());
+                    }else {
+                        int positionVV = positionV;
+                        CreateNotification.createNotification(MainActivity.this, musicList.get(positionVV), R.drawable.ic_play, 1,musicList.size());
+
+                    }
+                }
             }
         },2000);
 
@@ -627,74 +830,188 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
     //getnext song
     private void GetNextSong() {
         int dv = positionV;
+        int dvg = positionVG;
         final int positionVV = dv+1;
-        Log.d("TAG", ": next song "+positionVV + " newval "+positionVV);
-        if (totalSongsV!=positionVV){
-            mediaPlayer.reset();
-            songduration.setText(milliSecondsToTimer(0));
-            updateseekBar();
-            playerSeekBar.setEnabled(false);
-            playProgressing.setVisibility(View.VISIBLE);
-            btnPlayPause.setVisibility(View.GONE);
-            playProgressingMini.setVisibility(View.VISIBLE);
-            btnPlayPauseMini.setVisibility(View.GONE);
-            RequestQueue queue = Volley.newRequestQueue(this);
-            try {
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(musicList.get(positionVV).getSongUrl());
+        final int positionVVG = dvg+1;
+        //getnext song
+        try {
+            if (playListToShow.equals("TopSongsPlayLIST")){
+                if (totalSongsV!=positionVV){
+                    CreateNotification.createNotification(MainActivity.this, musicList.get(positionV+1), R.drawable.ic_pause, 1,musicList.size());
+                    mediaPlayer.reset();
+                songduration.setText(milliSecondsToTimer(0));
+                updateseekBar();
+                playerSeekBar.setEnabled(false);
+                playProgressing.setVisibility(View.VISIBLE);
+                btnPlayPause.setVisibility(View.GONE);
+                playProgressingMini.setVisibility(View.VISIBLE);
+                btnPlayPauseMini.setVisibility(View.GONE);
+                String thisSongURL = null;
+
+                thisSongURL = musicList.get(positionVV).getSongUrl();
+                Log.d(TAG, ": next song "+positionVV + " newval "+positionVV + " playlist:" +playListToShow + "url:"+musicList.get(positionVV).getSongUrl());
+                mediaPlayer.setDataSource(thisSongURL);
                 mediaPlayer.prepareAsync();
+
                 songArtisttv.setText(musicList.get(positionVV).getArtist());
                 songTitletv.setText(musicList.get(positionVV).getTitle());
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageMini);
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageExtended);
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(imageCloud);
+                    songTitleMini.setText(musicList.get(positionVV).getTitle());
+                    songArtistMini.setText(musicList.get(positionVV).getArtist());
+                if (musicList.get(positionV).getCoverUrl().equals("null")){
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageMini);
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageExtended);
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(imageCloud);
+                }else {
+                    Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageMini);
+                    Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageExtended);
+                    Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(imageCloud);
+                }
                 songArtisttv.setVisibility(View.VISIBLE);
                 songTitletv.setVisibility(View.VISIBLE);
                 positionV =positionVV;
                 checkMusicPrepare(positionV);
-            } catch (IOException e) {
-                e.printStackTrace();
+
+                }else {
+                    Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
+                }
+
+            }else if (playListToShow.equals("GosplayPlayLIST")){
+                if (totalSongsVG!=positionVVG){
+                    CreateNotification.createNotification(MainActivity.this, musicList.get(positionV+1), R.drawable.ic_pause, 1,musicList.size());
+                mediaPlayer.reset();
+                songduration.setText(milliSecondsToTimer(0));
+                updateseekBar();
+                playerSeekBar.setEnabled(false);
+                playProgressing.setVisibility(View.VISIBLE);
+                btnPlayPause.setVisibility(View.GONE);
+                playProgressingMini.setVisibility(View.VISIBLE);
+                btnPlayPauseMini.setVisibility(View.GONE);
+                String thisSongURL = null;
+
+                Log.d(TAG, ": next song "+positionVV + " newval "+positionVV + " playlist:" +playListToShow + "url:"+gospelplayList.get(positionVV).getSongUrl());
+                thisSongURL = gospelplayList.get(positionVV).getSongUrl();
+                mediaPlayer.setDataSource(thisSongURL);
+                mediaPlayer.prepareAsync();
+
+                songArtisttv.setText(gospelplayList.get(positionVV).getArtist());
+                songTitletv.setText(gospelplayList.get(positionVV).getTitle());
+                    songTitleMini.setText(gospelplayList.get(positionVV).getTitle());
+                    songArtistMini.setText(gospelplayList.get(positionVV).getArtist());
+                if (gospelplayList.get(positionV).getCoverUrl().equals("null")){
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageMini);
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageExtended);
+                    Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(imageCloud);
+                }else {
+                    Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(coverImageMini);
+                    Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(coverImageExtended);
+                    Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(imageCloud);
+                }
+                songArtisttv.setVisibility(View.VISIBLE);
+                songTitletv.setVisibility(View.VISIBLE);
+                positionV =positionVV;
+                checkMusicPrepare(positionV);
+                }else {
+                    Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
+                }
             }
-        }else {
-            Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-
     }
+
     private void GetPreviousSong() {
         int dv = positionV;
+        int dvg = positionVG;
         final int positionVV = dv-1;
+        final int positionVVG = dvg-1;
 
-        if (positionVV==-1){
-            Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
-        }else {
-            songduration.setText(milliSecondsToTimer(0));
-            updateseekBar();
-            playerSeekBar.setEnabled(false);
-            mediaPlayer.reset();
-            playProgressing.setVisibility(View.VISIBLE);
-            btnPlayPause.setVisibility(View.GONE);
-            playProgressingMini.setVisibility(View.VISIBLE);
-            btnPlayPauseMini.setVisibility(View.GONE);
+        //getnext song
+        try {
+            if (playListToShow.equals("TopSongsPlayLIST")){
+                if (positionVV!=-1){
+                    CreateNotification.createNotification(MainActivity.this, musicList.get(positionV-1), R.drawable.ic_pause, 1,musicList.size());
+                    mediaPlayer.reset();
+                    songduration.setText(milliSecondsToTimer(0));
+                    updateseekBar();
+                    playerSeekBar.setEnabled(false);
+                    playProgressing.setVisibility(View.VISIBLE);
+                    btnPlayPause.setVisibility(View.GONE);
+                    playProgressingMini.setVisibility(View.VISIBLE);
+                    btnPlayPauseMini.setVisibility(View.GONE);
+                    String thisSongURL = null;
 
-            Log.d("TAG", ": previous song "+positionV + " newval "+positionVV);
-            try {
-                mediaPlayer.reset();
-                mediaPlayer.setDataSource(musicList.get(positionVV).getSongUrl());
-                mediaPlayer.prepareAsync();
-                songArtisttv.setText(musicList.get(positionVV).getArtist());
-                songTitletv.setText(musicList.get(positionVV).getTitle());
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageMini);
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageExtended);
-                Glide.with(MainActivity.this).load(musicList.get(positionVV).getCoverUrl()).into(imageCloud);
-                songArtisttv.setVisibility(View.VISIBLE);
-                songTitletv.setVisibility(View.VISIBLE);
-                positionV =positionVV;
-                checkMusicPrepare(positionV);
-            } catch (IOException e) {
-                e.printStackTrace();
+                    thisSongURL = musicList.get(positionVV).getSongUrl();
+                    Log.d(TAG, ": next song "+positionVV + " newval "+positionVV + " playlist:" +playListToShow + "url:"+musicList.get(positionVV).getSongUrl());
+                    mediaPlayer.setDataSource(thisSongURL);
+                    mediaPlayer.prepareAsync();
+
+                    songArtisttv.setText(musicList.get(positionVV).getArtist());
+                    songTitletv.setText(musicList.get(positionVV).getTitle());
+                    songTitleMini.setText(musicList.get(positionVV).getTitle());
+                    songArtistMini.setText(musicList.get(positionVV).getArtist());
+                    if (musicList.get(positionV).getCoverUrl().equals("null")){
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageMini);
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageExtended);
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(imageCloud);
+                    }else {
+                        Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageMini);
+                        Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(coverImageExtended);
+                        Glide.with(this).load(musicList.get(positionVV).getCoverUrl()).into(imageCloud);
+                    }
+                    songArtisttv.setVisibility(View.VISIBLE);
+                    songTitletv.setVisibility(View.VISIBLE);
+                    positionV =positionVV;
+                    checkMusicPrepare(positionV);
+
+                }else {
+                    Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
+                }
+
+            }else if (playListToShow.equals("GosplayPlayLIST")){
+                if (positionVVG!=-1){
+                    CreateNotification.createNotification(MainActivity.this, musicList.get(positionV-1), R.drawable.ic_pause, 1,musicList.size());
+                    mediaPlayer.reset();
+                    songduration.setText(milliSecondsToTimer(0));
+                    updateseekBar();
+                    playerSeekBar.setEnabled(false);
+                    playProgressing.setVisibility(View.VISIBLE);
+                    btnPlayPause.setVisibility(View.GONE);
+                    playProgressingMini.setVisibility(View.VISIBLE);
+                    btnPlayPauseMini.setVisibility(View.GONE);
+                    String thisSongURL = null;
+
+                    Log.d(TAG, ": next song "+positionVV + " newval "+positionVV + " playlist:" +playListToShow + "url:"+gospelplayList.get(positionVV).getSongUrl());
+                    thisSongURL = gospelplayList.get(positionVV).getSongUrl();
+                    mediaPlayer.setDataSource(thisSongURL);
+                    mediaPlayer.prepareAsync();
+
+                    songArtisttv.setText(gospelplayList.get(positionVV).getArtist());
+                    songTitletv.setText(gospelplayList.get(positionVV).getTitle());
+                    songTitleMini.setText(gospelplayList.get(positionVV).getTitle());
+                    songArtistMini.setText(gospelplayList.get(positionVV).getArtist());
+                    if (gospelplayList.get(positionV).getCoverUrl().equals("null")){
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageMini);
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(coverImageExtended);
+                        Glide.with(this).load(R.drawable.rongmei_music_logo1000).into(imageCloud);
+                    }else {
+                        Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(coverImageMini);
+                        Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(coverImageExtended);
+                        Glide.with(this).load(gospelplayList.get(positionVV).getCoverUrl()).into(imageCloud);
+                    }
+                    songArtisttv.setVisibility(View.VISIBLE);
+                    songTitletv.setVisibility(View.VISIBLE);
+                    positionV =positionVV;
+                    checkMusicPrepare(positionV);
+                }else {
+                    Toast.makeText(this, "No song in queue..", Toast.LENGTH_SHORT).show();
+                }
             }
 
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
@@ -708,6 +1025,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
             public void onResponse(JSONArray response) {
                 gospelplayList = new ArrayList<>();
                 gospelplayList.clear();
+                totalSongsVG = response.length();
                 for (int i=0; i <response.length(); i++){
                     try {
                         JSONObject musicObject = response.getJSONObject(i);
@@ -783,7 +1101,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
 
                     loadingLay.setVisibility(View.GONE);
                     topSongsLay.setVisibility(View.VISIBLE);
-                    receiveBroadCase();
+
                     if (FreshStart){
                         loadFirstMusic();
                     }
@@ -868,7 +1186,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickInterfac
     @Override
     public void onItemClick(int position,String cplaylist, int id, String songURL, String songTitle, String songArtist) {
 
-
+        hideSoftKeyBoard();
         if (cplaylist.equals("GosplayPlayLIST")){
             playListToShow  = cplaylist;
         }else if (cplaylist.equals("TopSongsPlayLIST")){

@@ -14,7 +14,7 @@ public class NotificationActionServices extends BroadcastReceiver {
         context.sendBroadcast(new Intent("TRACKS_TRACKS")
         .putExtra("actionname", intent.getAction()));
 
-        Log.d("myTAG", "......"+intent.getAction());
+        Log.d("serviceTAG", "......"+intent.getAction());
 
     }
 }

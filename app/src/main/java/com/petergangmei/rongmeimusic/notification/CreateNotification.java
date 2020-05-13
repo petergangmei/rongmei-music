@@ -96,7 +96,7 @@ public class CreateNotification {
                        .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                                .setShowCancelButton(true)
                                .setMediaSession(mediaSessionCompat.getSessionToken()))
-                       .setPriority(NotificationCompat.PRIORITY_HIGH)
+                       .setPriority(NotificationManager.IMPORTANCE_HIGH)
                        .build();
 
            notificationManagerCompat.notify(1,notification);

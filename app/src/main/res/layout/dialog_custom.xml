@@ -22,7 +22,7 @@
                 android:layout_centerVertical="true"
                 android:textStyle="bold"
                 android:textColor="@color/colorWhite"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:layout_centerHorizontal="true"
                 android:text="Account"/>
 
